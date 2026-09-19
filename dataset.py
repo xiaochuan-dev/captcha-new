@@ -1,264 +1,268 @@
 import os
-import shutil
 
 import numpy as np
-import pyarrow.parquet as pq
 import torch
 from torch.utils.data import Dataset
-from PIL import Image
 from huggingface_hub import hf_hub_download
 
 from config import (
-    CHAR2IDX,
     IMG_H,
     IMG_W,
     HF_REPO,
-    HF_FILENAME,
-    LOCAL_PARQUET,
 )
 
 
-def ensure_parquet(
-    local_path: str = LOCAL_PARQUET,
-    repo_id: str = HF_REPO,
-    filename: str = HF_FILENAME,
+# =========================
+# 数据集文件
+# =========================
+
+HF_IMAGES_FILENAME = "captcha_fixed_images.npy"
+HF_LABELS_FILENAME = "captcha_fixed_labels.npy"
+
+LOCAL_IMAGES = "./data/captcha_fixed_images.npy"
+LOCAL_LABELS = "./data/captcha_fixed_labels.npy"
+
+
+def ensure_file(
+    local_path: str,
+    repo_id: str,
+    filename: str,
 ) -> str:
-    """本地没有则从 Hugging Face 自动下载。"""
-    if os.path.exists(local_path) and os.path.getsize(local_path) > 0:
-        print(f"使用本地数据集: {local_path}", flush=True)
+    """
+    本地没有则从 Hugging Face 自动下载。
+    """
+
+    if (
+        os.path.exists(local_path)
+        and os.path.getsize(local_path) > 0
+    ):
+        print(
+            f"使用本地数据: {local_path}",
+            flush=True,
+        )
         return local_path
 
-    print(f"本地未找到 {local_path}，正在从 Hugging Face 下载...", flush=True)
-    print(f"  repo: {repo_id}", flush=True)
-    print(f"  file: {filename}", flush=True)
+    print(
+        f"本地未找到 {local_path}",
+        flush=True,
+    )
 
-    os.makedirs(os.path.dirname(local_path) or ".", exist_ok=True)
+    print(
+        f"正在从 Hugging Face 下载: {filename}",
+        flush=True,
+    )
+
+    print(
+        f"  repo: {repo_id}",
+        flush=True,
+    )
+
+    os.makedirs(
+        os.path.dirname(local_path) or ".",
+        exist_ok=True,
+    )
 
     downloaded = hf_hub_download(
         repo_id=repo_id,
         filename=filename,
         repo_type="dataset",
-        local_dir=os.path.dirname(os.path.abspath(local_path)) or ".",
+        local_dir=os.path.dirname(
+            os.path.abspath(local_path)
+        ) or ".",
     )
 
+    # hf_hub_download 返回的路径可能就是 local_path
     if os.path.abspath(downloaded) != os.path.abspath(local_path):
         if not os.path.exists(local_path):
-            shutil.copy2(downloaded, local_path)
-        print(f"已保存到: {local_path}", flush=True)
+            os.replace(
+                downloaded,
+                local_path,
+            )
+
+    print(
+        f"下载完成: {local_path}",
+        flush=True,
+    )
 
     return local_path
-
-
-def bytes_to_rgb(image_bytes: bytes, height: int, width: int) -> np.ndarray:
-    """RGB 位图字节 -> (H, W, 3) uint8"""
-    arr = np.frombuffer(image_bytes, dtype=np.uint8)
-    return arr.reshape(int(height), int(width), 3)
-
-
-def resize_keep_ratio_pad(
-    img: Image.Image,
-    target_h: int = IMG_H,
-    target_w: int = IMG_W,
-    fill: int = 255,
-) -> Image.Image:
-
-    src_w, src_h = img.size
-
-    if src_w <= 0 or src_h <= 0:
-        return Image.new(img.mode, (target_w, target_h), fill)
-
-    scale = min(
-        target_w / src_w,
-        target_h / src_h,
-    )
-
-    new_w = max(1, int(round(src_w * scale)))
-    new_h = max(1, int(round(src_h * scale)))
-
-    img = img.resize(
-        (new_w, new_h),
-        Image.BILINEAR,
-    )
-
-    canvas = Image.new(
-        img.mode,
-        (target_w, target_h),
-        fill,
-    )
-
-    offset_x = (target_w - new_w) // 2
-    offset_y = (target_h - new_h) // 2
-
-    canvas.paste(
-        img,
-        (offset_x, offset_y),
-    )
-
-    return canvas
-
-
-def rgb_to_model_input(
-    rgb: np.ndarray,
-    h: int = IMG_H,
-    w: int = IMG_W,
-) -> torch.Tensor:
-
-    img = Image.fromarray(
-        rgb,
-        mode="RGB",
-    ).convert("L")
-
-    img = resize_keep_ratio_pad(
-        img,
-        target_h=h,
-        target_w=w,
-        fill=255,
-    )
-
-    arr = np.asarray(
-        img,
-        dtype=np.float32,
-    ) / 255.0
-
-    return torch.from_numpy(
-        arr
-    ).unsqueeze(0)
 
 
 class CaptchaDataset(Dataset):
 
     def __init__(
         self,
-        parquet_path: str | None = None,
+        images_path: str | None = None,
+        labels_path: str | None = None,
         transform=None,
     ):
 
-        path = ensure_parquet(
-            parquet_path or LOCAL_PARQUET
+        images_path = images_path or LOCAL_IMAGES
+        labels_path = labels_path or LOCAL_LABELS
+
+        # =========================
+        # 自动下载图片
+        # =========================
+
+        images_path = ensure_file(
+            local_path=images_path,
+            repo_id=HF_REPO,
+            filename=HF_IMAGES_FILENAME,
+        )
+
+        # =========================
+        # 自动下载标签
+        # =========================
+
+        labels_path = ensure_file(
+            local_path=labels_path,
+            repo_id=HF_REPO,
+            filename=HF_LABELS_FILENAME,
         )
 
         print(
-            f"加载数据集: {path}",
+            f"加载图片: {images_path}",
             flush=True,
         )
 
-        # 不再使用 pd.read_parquet()
-        self.parquet = pq.ParquetFile(path)
+        print(
+            f"加载标签: {labels_path}",
+            flush=True,
+        )
+
+        # =========================
+        # mmap
+        # =========================
+
+        self.images = np.load(
+            images_path,
+            mmap_mode="r",
+        )
+
+        self.labels = np.load(
+            labels_path,
+            mmap_mode="r",
+        )
 
         self.transform = transform
 
-        # 总样本数
-        self.length = self.parquet.metadata.num_rows
+        # =========================
+        # 检查
+        # =========================
 
-        # 每个 row group 的样本数
-        self.group_sizes = [
-            self.parquet.metadata.row_group(i).num_rows
-            for i in range(self.parquet.num_row_groups)
-        ]
+        if self.images.ndim != 3:
+            raise ValueError(
+                f"图片维度错误: {self.images.shape}"
+            )
 
-        # 每个 row group 的全局起始 index
-        self.group_offsets = np.cumsum(
-            [0] + self.group_sizes
-        )
+        if self.images.shape[1] != IMG_H:
+            raise ValueError(
+                f"图片高度错误: "
+                f"{self.images.shape[1]} != {IMG_H}"
+            )
 
-        # 当前 worker 内缓存
-        self._cached_group = None
-        self._cached_table = None
+        if self.images.shape[2] != IMG_W:
+            raise ValueError(
+                f"图片宽度错误: "
+                f"{self.images.shape[2]} != {IMG_W}"
+            )
+
+        if self.images.dtype != np.uint8:
+            raise ValueError(
+                f"图片 dtype 错误: "
+                f"{self.images.dtype}"
+            )
+
+        if self.labels.ndim != 2:
+            raise ValueError(
+                f"标签维度错误: {self.labels.shape}"
+            )
+
+        if self.labels.shape[1] != 4:
+            raise ValueError(
+                f"标签长度错误: "
+                f"{self.labels.shape[1]} != 4"
+            )
+
+        if self.labels.dtype != np.uint8:
+            raise ValueError(
+                f"标签 dtype 错误: "
+                f"{self.labels.dtype}"
+            )
+
+        if len(self.images) != len(self.labels):
+            raise ValueError(
+                "图片和标签数量不一致: "
+                f"{len(self.images)} vs "
+                f"{len(self.labels)}"
+            )
 
         print(
-            f"样本数: {self.length:,}",
+            f"图片 shape: {self.images.shape}",
             flush=True,
         )
 
         print(
-            f"Row groups: {self.parquet.num_row_groups}",
+            f"图片 dtype: {self.images.dtype}",
+            flush=True,
+        )
+
+        print(
+            f"标签 shape: {self.labels.shape}",
+            flush=True,
+        )
+
+        print(
+            f"标签 dtype: {self.labels.dtype}",
+            flush=True,
+        )
+
+        print(
+            f"样本数: {len(self):,}",
             flush=True,
         )
 
     def __len__(self):
-        return self.length
-
-    def _find_group(self, idx: int):
-        """
-        根据全局 index 找 row group。
-        """
-        group = np.searchsorted(
-            self.group_offsets,
-            idx,
-            side="right",
-        ) - 1
-
-        local_idx = idx - self.group_offsets[group]
-
-        return int(group), int(local_idx)
-
-    def _load_group(self, group: int):
-
-        # 当前 worker 已经缓存
-        if self._cached_group == group:
-            return self._cached_table
-
-        # 只读取一个 row group
-        table = self.parquet.read_row_group(
-            group,
-            columns=[
-                "image",
-                "width",
-                "height",
-                "label",
-            ],
-        )
-
-        self._cached_group = group
-        self._cached_table = table
-
-        return table
+        return len(self.images)
 
     def __getitem__(self, idx):
 
         if idx < 0:
-            idx += self.length
+            idx += len(self)
 
-        if idx < 0 or idx >= self.length:
+        if idx < 0 or idx >= len(self):
             raise IndexError(idx)
 
-        group, local_idx = self._find_group(idx)
+        # =========================
+        # 图片
+        # =========================
 
-        table = self._load_group(group)
-
-        image_bytes = table["image"][local_idx].as_py()
-        width = table["width"][local_idx].as_py()
-        height = table["height"][local_idx].as_py()
-        label_str = table["label"][local_idx].as_py()
-
-        rgb = bytes_to_rgb(
-            image_bytes,
-            height,
-            width,
+        # mmap -> numpy -> torch
+        image = torch.from_numpy(
+            self.images[idx].copy()
         )
 
-        img = rgb_to_model_input(rgb)
+        # uint8 [0,255]
+        # ->
+        # float32 [0,1]
+        image = image.float().div_(255.0)
+
+        # [32,128]
+        # ->
+        # [1,32,128]
+        image = image.unsqueeze(0)
 
         if self.transform is not None:
-            img = self.transform(img)
+            image = self.transform(image)
 
-        label_str = str(label_str).lower()
+        # =========================
+        # 标签
+        # =========================
 
-        indices = [
-            CHAR2IDX[c]
-            for c in label_str
-            if c in CHAR2IDX
-        ]
+        label = torch.from_numpy(
+            self.labels[idx].copy()
+        ).long()
 
-        if not indices:
-            indices = [1]
-
-        label = torch.tensor(
-            indices,
-            dtype=torch.long,
-        )
-
-        return img, label, len(label)
+        return image, label, 4
 
 
 def ctc_collate_fn(batch):
@@ -267,7 +271,7 @@ def ctc_collate_fn(batch):
 
     imgs = torch.stack(
         imgs,
-        0,
+        dim=0,
     )
 
     labels = torch.cat(
