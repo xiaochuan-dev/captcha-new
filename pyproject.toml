@@ -8,10 +8,16 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "einops>=0.8.2",
     "huggingface-hub>=1.32.0",
     "pandas>=3.0.6",
+    "pillow>=12.3.0",
     "pyarrow>=25.0.1",
+    "safetensors>=0.8.0",
     "torch>=2.14.0",
+    "torchvision>=0.29.0",
+    "tqdm>=4.70.1",
+    "x-transformers>=2.28.8",
 ]
 
 [project.scripts]

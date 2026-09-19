@@ -1,0 +1,31 @@
+# 字符集：新数据集是大小写字母 + 数字
+CHARSET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+NUM_CLASSES = len(CHARSET) + 1  # +1 for CTC blank
+
+CHAR2IDX = {c: i + 1 for i, c in enumerate(CHARSET)}
+IDX2CHAR = {i + 1: c for i, c in enumerate(CHARSET)}
+BLANK = 0
+
+# 模型输入尺寸（与原 model 一致）
+IMG_H = 32
+IMG_W = 128
+CHANNELS = 1
+
+# 训练
+BATCH_SIZE = 64
+EPOCHS = 50
+LR = 3e-4
+WEIGHT_DECAY = 0.05
+VAL_RATIO = 0.1
+NUM_WORKERS = 2
+
+# 数据：Hugging Face 数据集
+HF_REPO = "xiaochuan-dev/captcha"
+HF_FILENAME = "captcha_length4.parquet"
+LOCAL_PARQUET = "./data/captcha_length4.parquet"
+
+# 模型结构参数（与原 model 一致）
+MODEL_DIM = 256
+MODEL_DEPTH = 6
+MODEL_HEADS = 4
+MODEL_DROPOUT = 0.2
