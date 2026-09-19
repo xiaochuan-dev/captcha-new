@@ -124,7 +124,8 @@ class CaptchaDataset(Dataset):
         if self.transform is not None:
             img = self.transform(img)
 
-        label_str = str(row["label"])
+        # 大写映射为小写，词表只有 0-9a-z
+        label_str = str(row["label"]).lower()
         indices = [CHAR2IDX[c] for c in label_str if c in CHAR2IDX]
         if not indices:
             # 极端情况：标签为空或全是未知字符，给一个 dummy 避免 CTC 崩

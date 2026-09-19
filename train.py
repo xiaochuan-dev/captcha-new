@@ -1,3 +1,10 @@
+"""
+训练入口。无命令行参数。
+
+  python train.py
+
+多卡（>1）时自动使用 nn.DataParallel。
+"""
 import os
 
 import torch
@@ -6,7 +13,24 @@ from torch.utils.data import DataLoader, random_split
 from tqdm import tqdm
 from safetensors.torch import save_file
 
-from config import *
+from config import (
+    NUM_CLASSES,
+    IDX2CHAR,
+    IMG_H,
+    IMG_W,
+    CHANNELS,
+    BATCH_SIZE,
+    EPOCHS,
+    LR,
+    WEIGHT_DECAY,
+    VAL_RATIO,
+    NUM_WORKERS,
+    MODEL_DIM,
+    MODEL_DEPTH,
+    MODEL_HEADS,
+    MODEL_DROPOUT,
+    LOCAL_PARQUET,
+)
 from model import CaptchaCNNTransformer
 from dataset import CaptchaDataset, ctc_collate_fn
 
