@@ -437,7 +437,7 @@ def train():
 
         print(
             f"Epoch {epoch} | "
-            f"Loss: {avg_loss:.4f} | "
+            f"Train Loss: {avg_loss:.4f} | "
             f"Val Acc: {acc:.4f}",
             flush=True,
         )
