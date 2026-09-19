@@ -1,0 +1,18 @@
+[project]
+name = "captcha-new"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "2239559319", email = "w2239559319@outlook.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "huggingface-hub>=1.32.0",
+    "pandas>=3.0.6",
+    "pyarrow>=25.0.1",
+    "torch>=2.14.0",
+]
+
+[project.scripts]
+captcha-new = "captcha_new:main"
