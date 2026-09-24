@@ -16,8 +16,8 @@ from config import (
 # 数据集文件
 # =========================
 
-HF_IMAGES_FILENAME = "captcha_fixed_images.npy"
-HF_LABELS_FILENAME = "captcha_fixed_labels.npy"
+HF_IMAGES_FILENAME = "images.npy"
+HF_LABELS_FILENAME = "labels.npy"
 
 LOCAL_IMAGES = "./data/captcha_fixed_images.npy"
 LOCAL_LABELS = "./data/captcha_fixed_labels.npy"
