@@ -25,7 +25,7 @@ HF_FILENAME = "captcha.parquet"
 LOCAL_PARQUET = "./data/captcha.parquet"
 
 # 模型结构参数（与原 model 一致）
-MODEL_DIM = 256
-MODEL_DEPTH = 6
-MODEL_HEADS = 4
+MODEL_DIM = 512
+MODEL_DEPTH = 8
+MODEL_HEADS = 8
 MODEL_DROPOUT = 0.2
