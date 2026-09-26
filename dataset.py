@@ -1,5 +1,5 @@
 import os
-
+import pyarrow.parquet as pq
 import numpy as np
 import torch
 from torch.utils.data import Dataset
@@ -9,6 +9,7 @@ from config import (
     IMG_H,
     IMG_W,
     HF_REPO,
+    LOCAL_PARQUET
 )
 
 
@@ -88,182 +89,40 @@ def ensure_file(
 
 
 class CaptchaDataset(Dataset):
+    def __init__(self, transform=None):
 
-    def __init__(
-        self,
-        images_path: str | None = None,
-        labels_path: str | None = None,
-        transform=None,
-    ):
-
-        images_path = images_path or LOCAL_IMAGES
-        labels_path = labels_path or LOCAL_LABELS
-
-        # =========================
-        # 自动下载图片
-        # =========================
-
-        images_path = ensure_file(
-            local_path=images_path,
-            repo_id=HF_REPO,
-            filename=HF_IMAGES_FILENAME,
-        )
-
-        # =========================
-        # 自动下载标签
-        # =========================
-
-        labels_path = ensure_file(
-            local_path=labels_path,
+        parquet_path = ensure_file(
+            local_path=LOCAL_PARQUET,
             repo_id=HF_REPO,
             filename=HF_LABELS_FILENAME,
         )
 
-        print(
-            f"加载图片: {images_path}",
-            flush=True,
-        )
-
-        print(
-            f"加载标签: {labels_path}",
-            flush=True,
-        )
-
-        # =========================
-        # mmap
-        # =========================
-
-        self.images = np.load(
-            images_path,
-            mmap_mode="r",
-        )
-
-        self.labels = np.load(
-            labels_path,
-            mmap_mode="r",
-        )
-
+        self.table = pq.read_table(parquet_path)
+        self.images = self.table["image"]      # BinaryArray
+        self.labels = self.table["labels"]     # FixedSizeListArray
         self.transform = transform
 
-        # =========================
-        # 检查
-        # =========================
-
-        if self.images.ndim != 3:
-            raise ValueError(
-                f"图片维度错误: {self.images.shape}"
-            )
-
-        if self.images.shape[1] != IMG_H:
-            raise ValueError(
-                f"图片高度错误: "
-                f"{self.images.shape[1]} != {IMG_H}"
-            )
-
-        if self.images.shape[2] != IMG_W:
-            raise ValueError(
-                f"图片宽度错误: "
-                f"{self.images.shape[2]} != {IMG_W}"
-            )
-
-        if self.images.dtype != np.uint8:
-            raise ValueError(
-                f"图片 dtype 错误: "
-                f"{self.images.dtype}"
-            )
-
-        if self.labels.ndim != 2:
-            raise ValueError(
-                f"标签维度错误: {self.labels.shape}"
-            )
-
-        if self.labels.shape[1] != 4:
-            raise ValueError(
-                f"标签长度错误: "
-                f"{self.labels.shape[1]} != 4"
-            )
-
-        if self.labels.dtype != np.uint8:
-            raise ValueError(
-                f"标签 dtype 错误: "
-                f"{self.labels.dtype}"
-            )
-
-        if len(self.images) != len(self.labels):
-            raise ValueError(
-                "图片和标签数量不一致: "
-                f"{len(self.images)} vs "
-                f"{len(self.labels)}"
-            )
-
-        print(
-            f"图片 shape: {self.images.shape}",
-            flush=True,
-        )
-
-        print(
-            f"图片 dtype: {self.images.dtype}",
-            flush=True,
-        )
-
-        print(
-            f"标签 shape: {self.labels.shape}",
-            flush=True,
-        )
-
-        print(
-            f"标签 dtype: {self.labels.dtype}",
-            flush=True,
-        )
-
-        print(
-            f"样本数: {len(self):,}",
-            flush=True,
-        )
+        self.h = IMG_H
+        self.w = IMG_W
 
     def __len__(self):
-        return len(self.images)
+        return len(self.table)
 
     def __getitem__(self, idx):
+        # 1. 还原图片
+        raw = self.images[idx].as_py()          # bytes
+        img = np.frombuffer(raw, dtype=np.uint8).reshape(self.h, self.w)
 
-        if idx < 0:
-            idx += len(self)
-
-        if idx < 0 or idx >= len(self):
-            raise IndexError(idx)
-
-        # =========================
-        # 图片
-        # =========================
-
-        # mmap -> numpy -> torch
-        image = torch.from_numpy(
-            self.images[idx].copy()
-        )
-
-        # uint8 [0,255]
-        # ->
-        # float32 [0,1]
-        image = image.float().div_(255.0)
-
-        # [32,128]
-        # ->
-        # [1,32,128]
-        image = image.unsqueeze(0)
+        image = torch.from_numpy(img.copy()).float().div_(255.0)
+        image = image.unsqueeze(0)              # [1, H, W]
 
         if self.transform is not None:
             image = self.transform(image)
 
-        # =========================
-        # 标签
-        # =========================
-
-        label = torch.from_numpy(
-            self.labels[idx].copy()
-        ).long()
+        # 2. 标签
+        label = torch.tensor(self.labels[idx].as_py(), dtype=torch.long)
 
         return image, label, 4
-
 
 def ctc_collate_fn(batch):
 
