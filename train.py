@@ -139,7 +139,7 @@ def train():
         "batch_size": BATCH_SIZE,
         "num_workers": NUM_WORKERS,
         "pin_memory": torch.cuda.is_available(),
-        "collate_fn": ctc_collate_fn,
+        # "collate_fn": ctc_collate_fn,
     }
 
     # Windows / Linux 都支持。

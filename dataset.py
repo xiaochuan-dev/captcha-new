@@ -14,17 +14,6 @@ from config import (
 )
 
 
-# =========================
-# 数据集文件
-# =========================
-
-HF_IMAGES_FILENAME = "images.npy"
-HF_LABELS_FILENAME = "labels.npy"
-
-LOCAL_IMAGES = "./data/images.npy"
-LOCAL_LABELS = "./data/labels.npy"
-
-
 def ensure_file(
     local_path: str,
     repo_id: str,
