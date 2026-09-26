@@ -30,6 +30,7 @@ class CaptchaCNNTransformer(nn.Module):
             nn.Conv2d(128, 128, 3, padding=1),
             nn.BatchNorm2d(128),
             nn.GELU(),
+            nn.Dropout(dropout),
 
             nn.Conv2d(128, 256, 3, stride=2, padding=1),
             nn.BatchNorm2d(256),
@@ -38,6 +39,7 @@ class CaptchaCNNTransformer(nn.Module):
             nn.Conv2d(256, 256, 3, padding=1),
             nn.BatchNorm2d(256),
             nn.GELU(),
+            nn.Dropout(dropout),
         )
 
         self.height_pool = nn.Sequential(
