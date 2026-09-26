@@ -9,7 +9,8 @@ from config import (
     IMG_H,
     IMG_W,
     HF_REPO,
-    LOCAL_PARQUET
+    LOCAL_PARQUET,
+    HF_FILENAME
 )
 
 
@@ -94,7 +95,7 @@ class CaptchaDataset(Dataset):
         parquet_path = ensure_file(
             local_path=LOCAL_PARQUET,
             repo_id=HF_REPO,
-            filename=HF_LABELS_FILENAME,
+            filename=HF_FILENAME,
         )
 
         self.table = pq.read_table(parquet_path)
