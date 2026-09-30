@@ -51,6 +51,8 @@ class CaptchaDataset(Dataset):
         df = pd.read_parquet(parquet_path)
         images = np.stack(df["image"].values)          # (N, 4096)
         self.images = images.reshape(-1, 32, 128)      # (N, 32, 128)
+        if self.images.dtype == np.uint8:
+            self.images = self.images.astype(np.float32) / 255.0
     
         self.labels = df["label"]      # StringArray  ← 现在是字符串
         self.transform = transform
@@ -89,3 +91,8 @@ def ctc_collate_fn(batch):
     label_lengths = torch.tensor(label_lengths, dtype=torch.long)
 
     return imgs, labels, label_lengths
+
+if __name__ == '__main__':
+    dataset = CaptchaDataset()
+    print(dataset.images.shape)
+    print(dataset.images.dtype)
