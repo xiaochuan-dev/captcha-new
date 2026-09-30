@@ -88,7 +88,7 @@ class CaptchaDataset(Dataset):
             img = self.transform(img)
 
         # 2. 标签（string → 整数序列）
-        label_str = self.labels[idx].as_py()              # e.g. "A3B7"
+        label_str = self.labels[idx]
         # 转成字符索引列表
         label_indices = [char_to_idx[c] for c in label_str]
         label = torch.tensor(label_indices, dtype=torch.long)
