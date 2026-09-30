@@ -80,14 +80,12 @@ class CaptchaDataset(Dataset):
 
     def __getitem__(self, idx):
         # 1. 还原图片
-        raw = self.images[idx].as_py()                    # bytes
-        img = np.frombuffer(raw, dtype=np.uint8).reshape(self.h, self.w)
+        img = self.images[idx]  
+        
+        img = torch.from_numpy(img).unsqueeze(0)        # (1, 32, 128)
 
-        image = torch.from_numpy(img.copy()).float().div_(255.0)
-        image = image.unsqueeze(0)                        # [1, H, W]
-
-        if self.transform is not None:
-            image = self.transform(image)
+        if self.transform:
+            img = self.transform(img)
 
         # 2. 标签（string → 整数序列）
         label_str = self.labels[idx].as_py()              # e.g. "A3B7"
@@ -96,7 +94,7 @@ class CaptchaDataset(Dataset):
         label = torch.tensor(label_indices, dtype=torch.long)
 
         # 返回真实长度（方便 CTC 处理变长）
-        return image, label, len(label_indices)
+        return img, label, len(label_indices)
 
 
 def ctc_collate_fn(batch):
