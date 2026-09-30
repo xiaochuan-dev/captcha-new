@@ -66,8 +66,8 @@ class CaptchaCNNTransformer(nn.Module):
             depth=depth,
             heads=heads,
             ff_mult=4,
-            attn_dropout=0.1,
-            ff_dropout=0.1,
+            attn_dropout=dropout,
+            ff_dropout=dropout,
         )
 
         self.norm = nn.LayerNorm(dim)
