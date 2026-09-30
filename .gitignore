@@ -218,3 +218,7 @@ __marimo__/
 
 data
 test.py
+
+*.pt
+*.pth
+*.onnx

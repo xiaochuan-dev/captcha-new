@@ -20,9 +20,9 @@ VAL_RATIO = 0.1
 NUM_WORKERS = 2
 
 # 数据：Hugging Face 数据集
-HF_REPO = "xiaochuan-dev/captcha"
-HF_FILENAME = "captcha.parquet"
-LOCAL_PARQUET = "./data/captcha.parquet"
+HF_REPO = "freexiaochuan/captcha"
+HF_FILENAME = "captcha_data.parquet"
+LOCAL_PARQUET = "./data/captcha_data.parquet"
 
 # 模型结构参数（与原 model 一致）
 MODEL_DIM = 256

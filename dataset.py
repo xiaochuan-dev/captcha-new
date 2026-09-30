@@ -13,6 +13,16 @@ from config import (
     HF_FILENAME
 )
 
+# ====================== 字符集（按你的实际验证码字符修改） ======================
+# 示例：数字 + 大写字母
+CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+# 如果你的验证码还有小写字母，改成：
+# CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+
+char_to_idx = {c: i for i, c in enumerate(CHARSET)}
+idx_to_char = {i: c for i, c in enumerate(CHARSET)}
+NUM_CLASSES = len(CHARSET) + 1          # +1 是 CTC 的 blank
+
 
 def ensure_file(
     local_path: str,
@@ -22,65 +32,33 @@ def ensure_file(
     """
     本地没有则从 Hugging Face 自动下载。
     """
-
-    if (
-        os.path.exists(local_path)
-        and os.path.getsize(local_path) > 0
-    ):
-        print(
-            f"使用本地数据: {local_path}",
-            flush=True,
-        )
+    if os.path.exists(local_path) and os.path.getsize(local_path) > 0:
+        print(f"使用本地数据: {local_path}", flush=True)
         return local_path
 
-    print(
-        f"本地未找到 {local_path}",
-        flush=True,
-    )
+    print(f"本地未找到 {local_path}", flush=True)
+    print(f"正在从 Hugging Face 下载: {filename}", flush=True)
+    print(f"  repo: {repo_id}", flush=True)
 
-    print(
-        f"正在从 Hugging Face 下载: {filename}",
-        flush=True,
-    )
-
-    print(
-        f"  repo: {repo_id}",
-        flush=True,
-    )
-
-    os.makedirs(
-        os.path.dirname(local_path) or ".",
-        exist_ok=True,
-    )
+    os.makedirs(os.path.dirname(local_path) or ".", exist_ok=True)
 
     downloaded = hf_hub_download(
         repo_id=repo_id,
         filename=filename,
         repo_type="dataset",
-        local_dir=os.path.dirname(
-            os.path.abspath(local_path)
-        ) or ".",
+        local_dir=os.path.dirname(os.path.abspath(local_path)) or ".",
     )
 
-    # hf_hub_download 返回的路径可能就是 local_path
     if os.path.abspath(downloaded) != os.path.abspath(local_path):
         if not os.path.exists(local_path):
-            os.replace(
-                downloaded,
-                local_path,
-            )
+            os.replace(downloaded, local_path)
 
-    print(
-        f"下载完成: {local_path}",
-        flush=True,
-    )
-
+    print(f"下载完成: {local_path}", flush=True)
     return local_path
 
 
 class CaptchaDataset(Dataset):
     def __init__(self, transform=None):
-
         parquet_path = ensure_file(
             local_path=LOCAL_PARQUET,
             repo_id=HF_REPO,
@@ -89,7 +67,7 @@ class CaptchaDataset(Dataset):
 
         self.table = pq.read_table(parquet_path)
         self.images = self.table["image"]      # BinaryArray
-        self.labels = self.table["labels"]     # FixedSizeListArray
+        self.labels = self.table["label"]      # StringArray  ← 现在是字符串
         self.transform = transform
 
         self.h = IMG_H
@@ -100,37 +78,31 @@ class CaptchaDataset(Dataset):
 
     def __getitem__(self, idx):
         # 1. 还原图片
-        raw = self.images[idx].as_py()          # bytes
+        raw = self.images[idx].as_py()                    # bytes
         img = np.frombuffer(raw, dtype=np.uint8).reshape(self.h, self.w)
 
         image = torch.from_numpy(img.copy()).float().div_(255.0)
-        image = image.unsqueeze(0)              # [1, H, W]
+        image = image.unsqueeze(0)                        # [1, H, W]
 
         if self.transform is not None:
             image = self.transform(image)
 
-        # 2. 标签
-        label = torch.tensor(self.labels[idx].as_py(), dtype=torch.long)
+        # 2. 标签（string → 整数序列）
+        label_str = self.labels[idx].as_py()              # e.g. "A3B7"
+        # 转成字符索引列表
+        label_indices = [char_to_idx[c] for c in label_str]
+        label = torch.tensor(label_indices, dtype=torch.long)
 
-        return image, label, 4
+        # 返回真实长度（方便 CTC 处理变长）
+        return image, label, len(label_indices)
+
 
 def ctc_collate_fn(batch):
-
     imgs, labels, label_lengths = zip(*batch)
 
-    imgs = torch.stack(
-        imgs,
-        dim=0,
-    )
+    imgs = torch.stack(imgs, dim=0)                       # [B, 1, H, W]
 
-    labels = torch.cat(
-        labels,
-        dim=0,
-    )
-
-    label_lengths = torch.tensor(
-        label_lengths,
-        dtype=torch.long,
-    )
+    labels = torch.cat(labels, dim=0)                     # 把所有标签拼成一维
+    label_lengths = torch.tensor(label_lengths, dtype=torch.long)
 
     return imgs, labels, label_lengths
