@@ -5,24 +5,7 @@ import torch
 from torch.utils.data import Dataset
 from huggingface_hub import hf_hub_download
 
-from config import (
-    IMG_H,
-    IMG_W,
-    HF_REPO,
-    LOCAL_PARQUET,
-    HF_FILENAME
-)
-
-# ====================== 字符集（按你的实际验证码字符修改） ======================
-# 示例：数字 + 大写字母
-CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-# 如果你的验证码还有小写字母，改成：
-# CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-
-char_to_idx = {c: i for i, c in enumerate(CHARSET)}
-idx_to_char = {i: c for i, c in enumerate(CHARSET)}
-NUM_CLASSES = len(CHARSET) + 1          # +1 是 CTC 的 blank
-
+from config import *
 
 def ensure_file(
     local_path: str,
@@ -90,7 +73,7 @@ class CaptchaDataset(Dataset):
         # 2. 标签（string → 整数序列）
         label_str = self.labels[idx]
         # 转成字符索引列表
-        label_indices = [char_to_idx[c] for c in label_str]
+        label_indices = [CHAR2IDX[c] for c in label_str]
         label = torch.tensor(label_indices, dtype=torch.long)
 
         # 返回真实长度（方便 CTC 处理变长）
