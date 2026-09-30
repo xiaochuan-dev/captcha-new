@@ -65,16 +65,18 @@ class CaptchaDataset(Dataset):
             filename=HF_FILENAME,
         )
 
-        self.table = pq.read_table(parquet_path)
-        self.images = self.table["image"]      # BinaryArray
-        self.labels = self.table["label"]      # StringArray  ← 现在是字符串
+        df = pq.read_table(parquet_path)
+        images = np.stack(df["image"].values)          # (N, 4096)
+        self.images = images.reshape(-1, 32, 128)      # (N, 32, 128)
+    
+        self.labels = df["label"]      # StringArray  ← 现在是字符串
         self.transform = transform
 
         self.h = IMG_H
         self.w = IMG_W
 
     def __len__(self):
-        return len(self.table)
+        return len(self.images)
 
     def __getitem__(self, idx):
         # 1. 还原图片
