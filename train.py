@@ -353,7 +353,7 @@ def train():
             total_loss += loss.item()
 
             pbar.set_postfix(
-                loss=f"{loss.item():.4f}"
+                loss=f"{loss.item():.6f}"
             )
 
         # ========================================================
@@ -437,7 +437,7 @@ def train():
 
         print(
             f"Epoch {epoch} | "
-            f"Train Loss: {avg_loss:.4f} | "
+            f"Train Loss: {avg_loss:.6f} | "
             f"Val Acc: {acc:.4f}",
             flush=True,
         )
