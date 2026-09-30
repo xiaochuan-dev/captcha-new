@@ -1,6 +1,6 @@
 import os
-import pyarrow.parquet as pq
 import numpy as np
+import pandas as pd
 import torch
 from torch.utils.data import Dataset
 from huggingface_hub import hf_hub_download
@@ -65,7 +65,7 @@ class CaptchaDataset(Dataset):
             filename=HF_FILENAME,
         )
 
-        df = pq.read_table(parquet_path)
+        df = pd.read_parquet(parquet_path)
         images = np.stack(df["image"].values)          # (N, 4096)
         self.images = images.reshape(-1, 32, 128)      # (N, 32, 128)
     
