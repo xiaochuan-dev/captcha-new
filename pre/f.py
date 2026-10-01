@@ -93,21 +93,31 @@ def download_sichuan_gaokao():
     df.to_parquet("sichuan_gaokao.parquet", engine="pyarrow", compression="zstd")
 
 
-T = "049121366953ab694e775b71062461b91b1648316ae32d89ad1b59bc6a4b0a5c6184c9851df7e97b6a4948618c1e7a30d740dca436f0556cadce9bc4d67a179eab"
-N = T[2:]
-A = sm2.CryptSM2(public_key=N, private_key=None)
+def sm2_encrypt(data: str) -> str:
+    if not data:
+        raise ValueError("SM2加密内容不能为空")
+    public_key = "9121366953ab694e775b71062461b91b1648316ae32d89ad1b59bc6a4b0a5c6184c9851df7e97b6a4948618c1e7a30d740dca436f0556cadce9bc4d67a179eab"
+    sm2_crypt = sm2.CryptSM2(
+        public_key=public_key,
+        private_key=None,
+        mode=1
+    )
 
-def B():
-    c = '{"_t":%d,"_d":{}}' % int(time.time() * 1000)
-    h = A.encrypt(c.encode()).hex()
-    if not h.startswith("04"):
-        h = "04" + h
+    cipher_bytes = sm2_crypt.encrypt(data.encode("utf-8"))
+    if cipher_bytes is None:
+        raise RuntimeError("SM2 加密失败（KDF 结果为 0）")
 
-    return h
+    return "04" + cipher_bytes.hex()
+
+
+def generate_plaintext() -> str:
+    timestamp_ms = int(time.time() * 1000)
+    return f'{{"_t":{timestamp_ms},"_d":{{}}}}'
 
 def download_xinanjiaotong_item():
-
-    j = B()
+    plaintext = generate_plaintext()
+    ciphertext = sm2_encrypt(plaintext)
+    j = ciphertext
     url = f'https://yhxt.swjtu.edu.cn/yethan/code?_j={j}'
     headers = {
         "User-Agent": (
