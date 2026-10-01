@@ -3,6 +3,7 @@ import requests
 import numpy as np
 import pandas as pd
 import time
+import base64
 from huggingface_hub import HfApi
 from PIL import Image
 from io import BytesIO
@@ -126,11 +127,43 @@ def download_xinanjiaotong_item():
             "Chrome/120.0.0.0 Safari/537.36"
         ),
         "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
-        "Referer": "https://cx.sceea.cn/html/GKCJ.htm",
+        "Referer": "https://yhxt.swjtu.edu.cn/yethan",
     }
 
     r = requests.get(url, headers=headers, timeout=10)
-    print(r.json())
+
+    d = r.json()
+
+    data_url = d["data"]["img"]
+
+    b64_data = data_url.split(",", 1)[1]
+
+    img_bytes = base64.b64decode(b64_data)
+    img = Image.open(BytesIO(img_bytes))
+
+    arr = np.array(img, dtype=np.uint8)
+    res = arr.flatten().tolist()
+    return res
+
+def download_xinanjiaotong():
+    total = 1000
+
+    image = []
+
+    for i in range(total):
+        img = download_xinanjiaotong_item()
+        image.append(img)
+        time.sleep(1) 
+        print(f'{i} done', flush=True)
+
+    df = pd.DataFrame({
+        "image": image
+    })
+
+    df.to_parquet("xinanjiaotong.parquet", engine="pyarrow", compression="zstd")
+
+
 
 if __name__ == '__main__':
-    download_xinanjiaotong_item()
+    download_xinanjiaotong()
+    upload('xinanjiaotong.parquet')
