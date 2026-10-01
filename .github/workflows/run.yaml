@@ -21,5 +21,7 @@ jobs:
         run: uv sync --all-extras --dev
 
       - name: Run
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           uv run python -m pre.f
