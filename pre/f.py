@@ -56,6 +56,42 @@ def download_fuzhou():
 
     df.to_parquet("fuzhou.parquet", engine="pyarrow", compression="zstd")
 
+def download_sichuan_gaokao_item():
+    url =  f'https://api.sceea.cn/Handler/ValidateImageHandler.ashx?t={random.random()}'
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/120.0.0.0 Safari/537.36"
+        ),
+        "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+        "Referer": "https://cx.sceea.cn/html/GKCJ.htm",
+    }
+
+    r = requests.get(url, headers=headers, timeout=10)
+
+    img = Image.open(BytesIO(r.content))
+    arr = np.array(img, dtype=np.uint8)
+    res = arr.flatten().tolist()
+    return res
+def download_sichuan_gaokao():
+    total = 1000
+
+    image = []
+
+    for i in range(total):
+        img = download_sichuan_gaokao_item()
+        image.append(img)
+        time.sleep(1) 
+        print(f'{i} done', flush=True)
+
+    df = pd.DataFrame({
+        "image": image
+    })
+
+    df.to_parquet("sichuan_gaokao.parquet", engine="pyarrow", compression="zstd")
+
+
 if __name__ == '__main__':
-    download_fuzhou()
-    upload('fuzhou.parquet')
+    download_sichuan_gaokao()
+    upload('sichuan_gaokao.parquet')
