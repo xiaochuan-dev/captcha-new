@@ -120,7 +120,7 @@ def download_xinanjiaotong_item():
     }
 
     r = requests.get(url, headers=headers, timeout=10)
-    print(r.contetn)
+    print(r.content)
 
 if __name__ == '__main__':
     download_xinanjiaotong_item()
