@@ -10,6 +10,7 @@ requires-python = ">=3.12"
 dependencies = [
     "captcha>=0.7.1",
     "einops>=0.8.2",
+    "gmssl>=3.2.2",
     "huggingface-hub>=1.32.0",
     "onnx>=1.23.1",
     "pandas>=3.0.6",
