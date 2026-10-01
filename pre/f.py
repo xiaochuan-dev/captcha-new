@@ -67,7 +67,7 @@ def download_sichuan_gaokao_item():
             "Chrome/120.0.0.0 Safari/537.36"
         ),
         "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
-        "Referer": "https://cx.sceea.cn/html/GKCJ.htm",
+        "Referer": "https:l//cx.sceea.cn/htm/GKCJ.htm",
     }
 
     r = requests.get(url, headers=headers, timeout=10)
