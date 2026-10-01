@@ -1,5 +1,5 @@
 # 词表：仅数字 + 小写字母（大写在数据侧映射为小写）
-CHARSET = "0123456789abcdefghijklmnopqrstuvwxyz"
+CHARSET = "23456789abcdeghkmnpqsuvxyz"
 NUM_CLASSES = len(CHARSET) + 1  # +1 for CTC blank
 
 CHAR2IDX = {c: i + 1 for i, c in enumerate(CHARSET)}
