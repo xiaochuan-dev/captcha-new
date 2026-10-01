@@ -1,6 +1,8 @@
 import random
 import requests
 import numpy as np
+import pandas as pd
+import time
 from huggingface_hub import HfApi
 from PIL import Image
 from io import BytesIO
@@ -37,7 +39,23 @@ def download_fuzhou_item():
     arr = np.array(img, dtype=np.uint8)
     res = arr.flatten().tolist()
     return res
+def download_fuzhou():
+    total = 1000
+
+    image = []
+
+    for i in range(total):
+        img = download_fuzhou_item()
+        image.append(img)
+        time.sleep(1) 
+        print(f'{i} done', flush=True)
+
+    df = pd.DataFrame({
+        "image": image
+    })
+
+    df.to_parquet("fuzhou.parquet", engine="pyarrow", compression="zstd")
 
 if __name__ == '__main__':
-    r = download_fuzhou_item()
-    print(r, flush=True)
+    download_fuzhou()
+    upload('fuzhou.parquet')
