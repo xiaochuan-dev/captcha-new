@@ -6,8 +6,6 @@ from config import *
 def export_to_onnx(model_path='./checkpoints/best.pth', output_path='./checkpoints/model.onnx'):
 
     model = CaptchaCNNTransformer(
-        img_h=IMG_H,
-        img_w=IMG_W,
         dim=MODEL_DIM,
         depth=MODEL_DEPTH,
         heads=MODEL_HEADS,
