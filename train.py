@@ -13,6 +13,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, random_split
 from tqdm import tqdm
 from safetensors.torch import save_file
+from export import export_to_onnx
 
 from config import (
     NUM_CLASSES,
@@ -465,6 +466,8 @@ def train():
                 state,
                 "checkpoints/model.safetensors",
             )
+
+            export_to_onnx()
 
             print(
                 f"  → 保存最佳模型 "
