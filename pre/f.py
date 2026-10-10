@@ -77,21 +77,20 @@ def download_sichuan_gaokao_item():
     res = arr.flatten().tolist()
     return res
 def download_sichuan_gaokao():
-    total = 1000
+    total = 50000
 
     image = []
 
     for i in range(total):
         img = download_sichuan_gaokao_item()
         image.append(img)
-        time.sleep(1) 
         print(f'{i} done', flush=True)
 
     df = pd.DataFrame({
         "image": image
     })
 
-    df.to_parquet("sichuan_gaokao.parquet", engine="pyarrow", compression="zstd")
+    df.to_parquet("raw_sichuan_gaokao.parquet", engine="pyarrow", compression="zstd")
 
 
 def sm2_encrypt(data: str) -> str:
@@ -165,5 +164,5 @@ def download_xinanjiaotong():
 
 
 if __name__ == '__main__':
-    download_xinanjiaotong()
-    upload('xinanjiaotong.parquet')
+    download_sichuan_gaokao()
+    upload('raw_sichuan_gaokao.parquet')
