@@ -90,7 +90,7 @@ def download_sichuan_gaokao():
         "image": image
     })
 
-    df.to_parquet("raw2_sichuan_gaokao.parquet", engine="pyarrow", compression="zstd")
+    df.to_parquet("raw1_sichuan_gaokao.parquet", engine="pyarrow", compression="zstd")
 
 
 def sm2_encrypt(data: str) -> str:
