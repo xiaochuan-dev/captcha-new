@@ -77,7 +77,7 @@ def download_sichuan_gaokao_item():
     res = arr.flatten().tolist()
     return res
 def download_sichuan_gaokao():
-    total = 10000
+    total = 1000
 
     image = []
 
