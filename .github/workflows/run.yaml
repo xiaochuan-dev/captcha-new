@@ -26,3 +26,8 @@ jobs:
           HTTPS_PROXY: ${{ secrets.HTTPS_PROXY }}
         run: |
           uv run python -m pre.f
+      - name: upload
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          uv run python -m pre.u

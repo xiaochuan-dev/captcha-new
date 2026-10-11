@@ -1,16 +1,26 @@
-from huggingface_hub import HfApi, login
+import random
+import requests
+import numpy as np
+import pandas as pd
+import time
+import base64
+from huggingface_hub import HfApi
+from PIL import Image
+from io import BytesIO
+from gmssl import sm2
 
-api = HfApi()
+def upload(filename):
+    api = HfApi()
 
-REPO_ID = "xiaochuan-dev/captcha"
-LOCAL_PARQUET = "./data/labels.npy"
+    REPO_ID = "xiaochuan-dev/captcha-new"
+    LOCAL_PARQUET = f"./{filename}"
 
-api.upload_file(
-    path_or_fileobj=LOCAL_PARQUET,
-    path_in_repo="labels.npy",
-    repo_id=REPO_ID,
-    repo_type="dataset",
-    commit_message="Upload length-4 captcha dataset (RGB bitmap)",
-)
-
-print(f"上传完成 → https://huggingface.co/datasets/{REPO_ID}")
+    api.upload_file(
+        path_or_fileobj=LOCAL_PARQUET,
+        path_in_repo=filename,
+        repo_id=REPO_ID,
+        repo_type="dataset",
+        commit_message="Upload length-4 captcha dataset (RGB bitmap)",
+    )
+if __name__ == '__main__':
+    upload('raw_sichuan_gaokao.parquet')

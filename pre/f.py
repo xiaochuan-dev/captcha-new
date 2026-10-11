@@ -77,7 +77,7 @@ def download_sichuan_gaokao_item():
     res = arr.flatten().tolist()
     return res
 def download_sichuan_gaokao():
-    total = 3000
+    total = 10000
 
     image = []
 
@@ -165,4 +165,4 @@ def download_xinanjiaotong():
 
 if __name__ == '__main__':
     download_sichuan_gaokao()
-    upload('raw_sichuan_gaokao.parquet')
+    # upload('raw_sichuan_gaokao.parquet')
