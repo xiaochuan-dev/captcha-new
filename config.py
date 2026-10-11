@@ -21,8 +21,8 @@ NUM_WORKERS = 2
 
 # 数据：Hugging Face 数据集
 HF_REPO = "xiaochuan-dev/captcha-new"
-HF_FILENAME = "new_sichuan_gaokao.parquet"
-LOCAL_PARQUET = "./data/new_sichuan_gaokao.parquet"
+HF_FILENAME = "final_sichuan_gaokao.parquet"
+LOCAL_PARQUET = "./data/final_sichuan_gaokao.parquet"
 
 # 模型结构参数（与原 model 一致）
 MODEL_DIM = 256
