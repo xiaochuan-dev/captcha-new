@@ -78,5 +78,7 @@ def predict(filepaths, model_path):
 
 if __name__ == '__main__':
     model_path = './best.pth'          # 注意路径，可能是 ./checkpoints/best.pth
-    res = predict(['./data/2.png'], model_path=model_path)
+    img_paths = [f'./data/imgs/{f}' for f in os.listdir('./data/imgs') if os.path.isfile(os.path.join('./data/imgs', f))]
+    img_paths.sort()
+    res = predict(img_paths, model_path=model_path)
     print(res)

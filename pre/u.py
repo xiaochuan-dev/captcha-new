@@ -23,4 +23,4 @@ def upload(filename):
         commit_message="Upload length-4 captcha dataset (RGB bitmap)",
     )
 if __name__ == '__main__':
-    upload('raw3_sichuan_gaokao.parquet')
+    upload('raw1_sichuan_gaokao.parquet')
