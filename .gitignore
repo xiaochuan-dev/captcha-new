@@ -222,3 +222,5 @@ test.py
 *.pt
 *.pth
 *.onnx
+*.json
+*.parquet
