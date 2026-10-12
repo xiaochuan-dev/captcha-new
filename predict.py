@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 import os
+import json
 from PIL import Image
 
 from config import *
@@ -81,4 +82,6 @@ if __name__ == '__main__':
     img_paths = [f'./data/imgs/{f}' for f in os.listdir('./data/imgs') if os.path.isfile(os.path.join('./data/imgs', f))]
     img_paths.sort()
     res = predict(img_paths, model_path=model_path)
-    print(res)
+
+    with open('./res.json', 'w', encoding="utf-8") as f:
+        json.dump(res, f)
