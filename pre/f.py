@@ -77,7 +77,7 @@ def download_sichuan_gaokao_item():
     res = arr.flatten().tolist()
     return res
 def download_sichuan_gaokao():
-    total = 2000
+    total = 1000
 
     image = []
 
@@ -90,7 +90,7 @@ def download_sichuan_gaokao():
         "image": image
     })
 
-    df.to_parquet("raw3_sichuan_gaokao.parquet", engine="pyarrow", compression="zstd")
+    df.to_parquet("raw4_sichuan_gaokao.parquet", engine="pyarrow", compression="zstd")
 
 
 def sm2_encrypt(data: str) -> str:
