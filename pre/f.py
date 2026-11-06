@@ -33,7 +33,7 @@ def download_baoding_item():
             "Chrome/120.0.0.0 Safari/537.36"
         ),
         "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
-        "Referer": "https://jwcjwxt2.fzu.edu.cn:82/",
+        "Referer": "https://jw.cuggw.com/jwglxt",
     }
 
     r = requests.get(url, headers=headers, timeout=10)
