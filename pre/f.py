@@ -25,7 +25,7 @@ def upload(filename):
 
 def download_baoding_item():
     timestamp = int(round(time.time() * 1000))
-    url = f'https://jw.cuggw.com/jwglxt/kaptcha?time={timestamp}'
+    url = f'http://jw.qit.edu.cn/jwglxt/kaptcha?time={timestamp}'
     headers = {
         "User-Agent": (
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -33,7 +33,7 @@ def download_baoding_item():
             "Chrome/120.0.0.0 Safari/537.36"
         ),
         "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
-        "Referer": "https://jw.cuggw.com/jwglxt",
+        "Referer": "http://jw.qit.edu.cn/jwglxt",
     }
 
     r = requests.get(url, headers=headers, timeout=10)
