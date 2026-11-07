@@ -112,6 +112,7 @@ def train():
         transforms.RandomAffine(
             degrees=2,
             scale=(0.7, 1.3),
+            fill=255,
         ),
     ])
 
