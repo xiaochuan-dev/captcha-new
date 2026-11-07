@@ -10,7 +10,7 @@ import os
 
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader, random_split, Subset
 from torchvision import transforms
 from tqdm import tqdm
 from safetensors.torch import save_file
