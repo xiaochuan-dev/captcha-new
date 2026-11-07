@@ -11,6 +11,7 @@ import os
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, random_split
+from torchvision import transforms
 from tqdm import tqdm
 from safetensors.torch import save_file
 from export import export_to_onnx
@@ -107,30 +108,36 @@ def train():
     # 然后使用 mmap 读取。
     #
 
+    train_transform = transforms.Compose([
+        transforms.RandomAffine(
+            degrees=2,
+            scale=(0.7, 1.3),
+        ),
+    ])
+
+
     full_dataset = CaptchaDataset()
 
     # ============================================================
     # Train / Validation split
     # ============================================================
 
-    val_size = max(
-        1,
-        int(VAL_RATIO * len(full_dataset)),
-    )
-
+    val_size = max(1, int(VAL_RATIO * len(full_dataset)))
     train_size = len(full_dataset) - val_size
 
-    train_set, val_set = random_split(
-        full_dataset,
+    train_indices, val_indices = random_split(
+        range(len(full_dataset)),
         [train_size, val_size],
         generator=torch.Generator().manual_seed(42),
     )
 
-    print(
-        f"Train: {train_size:,} | "
-        f"Val: {val_size:,}",
-        flush=True,
-    )
+    train_dataset = CaptchaDataset(transform=train_transform)
+    val_dataset = CaptchaDataset()
+
+    train_set = Subset(train_dataset, train_indices)
+    val_set = Subset(val_dataset, val_indices)
+
+    print(f"Train: {train_size:,} | Val: {val_size:,}", flush=True)
 
     # ============================================================
     # DataLoader
