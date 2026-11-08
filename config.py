@@ -21,8 +21,8 @@ NUM_WORKERS = 2
 
 # 数据：Hugging Face 数据集
 HF_REPO = "xiaochuan-dev/captcha-new"
-HF_FILENAME = "captcha_dataset.parquet"
-LOCAL_PARQUET = "./data/captcha_dataset.parquet"
+HF_FILENAME = "captcha_dataset_red.parquet"
+LOCAL_PARQUET = "./data/captcha_dataset_red.parquet"
 
 # 模型结构参数（与原 model 一致）
 MODEL_DIM = 256
