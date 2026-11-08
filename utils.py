@@ -17,33 +17,10 @@ def resize_keep_ratio_pad(
         src_h - 4,
     ))
 
-    src_w, src_h = img.size
-
-    # 2. 按比例缩放
-    scale = min(
-        target_w / src_w,
-        target_h / src_h,
-    )
-
-    new_w = max(1, int(round(src_w * scale)))
-    new_h = max(1, int(round(src_h * scale)))
-
+    # 2. 直接强制缩放到目标尺寸
     img = img.resize(
-        (new_w, new_h),
+        (target_w, target_h),
         Image.Resampling.BILINEAR,
     )
 
-    # 3. 创建画布
-    canvas = Image.new(
-        "L",
-        (target_w, target_h),
-        fill,
-    )
-
-    # 4. 居中 padding
-    offset_x = (target_w - new_w) // 2
-    offset_y = (target_h - new_h) // 2
-
-    canvas.paste(img, (offset_x, offset_y))
-
-    return canvas
+    return img
