@@ -29,9 +29,5 @@ def resize_keep_ratio_pad(
         Image.Resampling.BILINEAR,
     )
 
-    # 4. 二值化
-    img = img.point(
-        lambda pixel: 0 if pixel < threshold else 255
-    )
 
     return img
