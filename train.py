@@ -132,7 +132,7 @@ def train():
         generator=torch.Generator().manual_seed(42),
     )
 
-    train_dataset = CaptchaDataset()
+    train_dataset = CaptchaDataset(transform=train_transform)
     val_dataset = CaptchaDataset()
 
     train_set = Subset(train_dataset, train_indices)
