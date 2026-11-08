@@ -6,6 +6,8 @@ from config import *
 def export_to_onnx(model_path='./checkpoints/best.pth', output_path='./checkpoints/model.onnx'):
 
     model = CaptchaCNNTransformer(
+        img_h=IMG_H,
+        img_w=IMG_W,
         dim=MODEL_DIM,
         depth=MODEL_DEPTH,
         heads=MODEL_HEADS,
@@ -17,7 +19,7 @@ def export_to_onnx(model_path='./checkpoints/best.pth', output_path='./checkpoin
     model.load_state_dict(torch.load(model_path, map_location='cpu'))
     model.eval()
     
-    dummy_input = torch.randn(1, 1, 32, 128)  # (batch, channels, height, width)
+    dummy_input = torch.randn(1, 1, IMG_H, IMG_W)  # (batch, channels, height, width)
     
     torch.onnx.export(
         model,

@@ -7,8 +7,8 @@ from x_transformers import Encoder
 class CaptchaCNNTransformer(nn.Module):
     def __init__(
         self,
-        img_h=32,
-        img_w=128,
+        img_h=64,
+        img_w=256,
         dim=256,
         depth=6,
         heads=4,

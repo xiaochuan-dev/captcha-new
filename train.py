@@ -201,6 +201,8 @@ def train():
     # ============================================================
 
     model = CaptchaCNNTransformer(
+        img_h=IMG_H,
+        img_w=IMG_W,
         dim=MODEL_DIM,
         depth=MODEL_DEPTH,
         heads=MODEL_HEADS,

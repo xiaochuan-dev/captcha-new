@@ -7,8 +7,8 @@ IDX2CHAR = {i + 1: c for i, c in enumerate(CHARSET)}
 BLANK = 0
 
 # 模型输入尺寸（与原 model 一致）
-IMG_H = 32
-IMG_W = 128
+IMG_H = 64
+IMG_W = 256
 CHANNELS = 1
 
 # 训练
