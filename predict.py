@@ -15,11 +15,13 @@ def predict(filepaths, model_path):
     print("Using device:", device)
 
     model = CaptchaCNNTransformer(
+        img_h=IMG_H,
+        img_w=IMG_W,
         dim=MODEL_DIM,
         depth=MODEL_DEPTH,
         heads=MODEL_HEADS,
         num_classes=NUM_CLASSES,
-        channels=CHANNELS,          # 1
+        channels=CHANNELS,
         dropout=MODEL_DROPOUT,
     ).to(device)
 
