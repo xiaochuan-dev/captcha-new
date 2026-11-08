@@ -1,3 +1,5 @@
+from PIL import Image
+
 def resize_keep_ratio_pad(
     img: Image.Image,
     target_h: int,
