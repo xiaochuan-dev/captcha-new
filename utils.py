@@ -8,18 +8,13 @@ def resize_keep_ratio_pad(
 ):
     src_w, src_h = img.size
 
-    if src_w <= 8 or src_h <= 8:
+    if src_w <= 0 or src_h <= 0:
         return Image.new("L", (target_w, target_h), fill)
 
-    # 1. 裁剪四周各 4 个像素
-    img = img.crop((
-        4,
-        4,
-        src_w - 4,
-        src_h - 4,
-    ))
+    # 1. 转换为灰度图
+    img = img.convert("L")
 
-    # 2. 直接强制缩放到目标尺寸
+    # 2. 强制缩放到目标尺寸
     img = img.resize(
         (target_w, target_h),
         Image.Resampling.BILINEAR,
