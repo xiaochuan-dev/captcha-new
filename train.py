@@ -111,7 +111,7 @@ def train():
     train_transform = transforms.Compose([
         transforms.RandomAffine(
             degrees=0,
-            scale=(0.99, 1.01),
+            scale=(0.90, 1.01),
             translate=(0.01, 0.01),
             fill=255,
         ),
