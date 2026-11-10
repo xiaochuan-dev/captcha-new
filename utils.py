@@ -5,29 +5,34 @@ def resize_keep_ratio_pad(
     target_h: int,
     target_w: int,
     fill: int = 255,
-    threshold: int = 128,
 ):
     src_w, src_h = img.size
 
-    if src_w <= 8 or src_h <= 8:
+    if src_w <= 0 or src_h <= 0:
         return Image.new("L", (target_w, target_h), fill)
 
-    # 1. 裁剪四周各 4px
-    img = img.crop((
-        4,
-        4,
-        src_w - 4,
-        src_h - 4,
-    ))
+    scale = min(
+        target_w / src_w,
+        target_h / src_h,
+    )
 
-    # 2. 转换为灰度图
-    img = img.convert("L")
+    new_w = max(1, int(round(src_w * scale)))
+    new_h = max(1, int(round(src_h * scale)))
 
-    # 3. 强制缩放到目标尺寸
     img = img.resize(
-        (target_w, target_h),
+        (new_w, new_h),
         Image.Resampling.BILINEAR,
     )
 
+    canvas = Image.new(
+        "L",
+        (target_w, target_h),
+        fill,
+    )
 
-    return img
+    offset_x = (target_w - new_w) // 2
+    offset_y = (target_h - new_h) // 2
+
+    canvas.paste(img, (offset_x, offset_y))
+
+    return canvas
