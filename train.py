@@ -7,6 +7,7 @@
 """
 
 import os
+import numpy as np
 
 import torch
 import torch.nn as nn
@@ -118,27 +119,22 @@ def train():
     ])
 
 
-    full_dataset = CaptchaDataset()
-    # ============================================================
-    # Train / Validation split
-    # ============================================================
-
-    val_size = max(1, int(VAL_RATIO * len(full_dataset)))
-    train_size = len(full_dataset) - val_size
-
-    train_indices, val_indices = random_split(
-        range(len(full_dataset)),
-        [train_size, val_size],
-        generator=torch.Generator().manual_seed(42),
-    )
-
     train_dataset = CaptchaDataset(transform=train_transform)
-    # train_dataset = CaptchaDataset()
+    val_dataset   = CaptchaDataset()
 
-    val_dataset = CaptchaDataset()
-    print('test text')
+    dataset_size = len(train_dataset)
+    val_size     = max(1, int(VAL_RATIO * dataset_size))
+    train_size   = dataset_size - val_size
+
+    # 固定随机种子
+    rng = np.random.RandomState(42)
+    indices = rng.permutation(dataset_size)
+
+    train_indices = indices[:train_size]
+    val_indices   = indices[train_size:]
+
     train_set = Subset(train_dataset, train_indices)
-    val_set = Subset(val_dataset, val_indices)
+    val_set   = Subset(val_dataset,   val_indices)
 
     print(f"Train: {train_size:,} | Val: {val_size:,}", flush=True)
 
