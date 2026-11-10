@@ -1,0 +1,28 @@
+[project]
+name = "captcha-new"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "2239559319", email = "w2239559319@outlook.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "captcha>=0.7.1",
+    "einops>=0.8.2",
+    "gmssl>=3.2.2",
+    "huggingface-hub>=1.32.0",
+    "onnx>=1.23.1",
+    "pandas>=3.0.6",
+    "pillow>=12.3.0",
+    "pyarrow>=25.0.1",
+    "requests>=2.34.2",
+    "safetensors>=0.8.0",
+    "torch>=2.14.0",
+    "torchvision>=0.29.0",
+    "tqdm>=4.70.1",
+    "x-transformers>=2.28.8",
+]
+
+[project.scripts]
+captcha-new = "captcha_new:main"
