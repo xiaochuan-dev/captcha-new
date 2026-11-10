@@ -119,7 +119,6 @@ def train():
 
 
     full_dataset = CaptchaDataset()
-    print('test text')
     # ============================================================
     # Train / Validation split
     # ============================================================
@@ -135,6 +134,7 @@ def train():
 
     train_dataset = CaptchaDataset(transform=train_transform)
     # train_dataset = CaptchaDataset()
+    print('test text')
 
     val_dataset = CaptchaDataset()
 
