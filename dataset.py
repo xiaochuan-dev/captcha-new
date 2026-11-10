@@ -1,55 +1,21 @@
-import os
+import torch
 import numpy as np
 import pandas as pd
-import torch
 from torch.utils.data import Dataset
-from huggingface_hub import hf_hub_download
-
-from config import *
-
-def ensure_file(
-    local_path: str,
-    repo_id: str,
-    filename: str,
-) -> str:
-    """
-    本地没有则从 Hugging Face 自动下载。
-    """
-    if os.path.exists(local_path) and os.path.getsize(local_path) > 0:
-        print(f"使用本地数据: {local_path}", flush=True)
-        return local_path
-
-    print(f"本地未找到 {local_path}", flush=True)
-    print(f"正在从 Hugging Face 下载: {filename}", flush=True)
-    print(f"  repo: {repo_id}", flush=True)
-
-    os.makedirs(os.path.dirname(local_path) or ".", exist_ok=True)
-
-    downloaded = hf_hub_download(
-        repo_id=repo_id,
-        filename=filename,
-        repo_type="dataset",
-        local_dir=os.path.dirname(os.path.abspath(local_path)) or ".",
-    )
-
-    if os.path.abspath(downloaded) != os.path.abspath(local_path):
-        if not os.path.exists(local_path):
-            os.replace(downloaded, local_path)
-
-    print(f"下载完成: {local_path}", flush=True)
-    return local_path
+from config import (
+    IMG_H, IMG_W, CHAR2IDX,
+    LOCAL_PARQUET, HF_REPO, HF_FILENAME,
+    VAL_RATIO,
+)
+from utils import ensure_file
 
 
 class CaptchaDataset(Dataset):
     def __init__(self, transform=None, indices=None, images=None, labels=None):
-        """
-        indices: 如果传入，表示这是一个子集
-        images / labels: 用于共享底层数据，避免重复加载
-        """
         self.transform = transform
 
         if images is None or labels is None:
-            # 第一次创建时才真正加载数据
+            # 只在第一次真正加载数据
             parquet_path = ensure_file(
                 local_path=LOCAL_PARQUET,
                 repo_id=HF_REPO,
@@ -63,7 +29,12 @@ class CaptchaDataset(Dataset):
 
         self.images = images
         self.labels = labels
-        self.indices = indices if indices is not None else np.arange(len(images))
+
+        # 关键：保证 indices 是 int64 的 numpy 数组
+        if indices is None:
+            self.indices = np.arange(len(images), dtype=np.int64)
+        else:
+            self.indices = np.asarray(indices, dtype=np.int64)
 
     def set_transform(self, transform):
         self.transform = transform
@@ -72,10 +43,10 @@ class CaptchaDataset(Dataset):
         return len(self.indices)
 
     def __getitem__(self, idx):
-        real_idx = self.indices[idx]
+        real_idx = int(self.indices[idx])          # 强制转成 python int，避免类型问题
 
-        img = self.images[real_idx]                          # (H, W)
-        img = torch.from_numpy(img).unsqueeze(0)             # (1, H, W)
+        img = self.images[real_idx]                # (H, W)
+        img = torch.from_numpy(img).unsqueeze(0)   # (1, H, W)
 
         if self.transform is not None:
             img = self.transform(img)
@@ -89,10 +60,8 @@ class CaptchaDataset(Dataset):
 
 def get_datasets(train_transform=None, seed=42):
     """
-    一次性加载数据，并返回 train_dataset 和 val_dataset。
-    底层 images / labels 只存在一份，内存不翻倍。
+    底层数据只加载一次，返回 train / val 两个数据集
     """
-    # 先加载完整数据
     full = CaptchaDataset(transform=None)
 
     dataset_size = len(full)
@@ -100,12 +69,11 @@ def get_datasets(train_transform=None, seed=42):
     train_size = dataset_size - val_size
 
     rng = np.random.RandomState(seed)
-    indices = rng.permutation(dataset_size)
+    all_indices = rng.permutation(dataset_size).astype(np.int64)
 
-    train_indices = indices[:train_size]
-    val_indices   = indices[train_size:]
+    train_indices = all_indices[:train_size]
+    val_indices   = all_indices[train_size:]
 
-    # 创建两个视图，共享同一份 images 和 labels
     train_dataset = CaptchaDataset(
         transform=train_transform,
         indices=train_indices,
