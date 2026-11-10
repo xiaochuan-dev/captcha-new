@@ -12,12 +12,12 @@ IMG_W = 128
 CHANNELS = 1
 
 # 训练
-BATCH_SIZE = 64
+BATCH_SIZE = 128
 EPOCHS = 30
 LR = 3e-4
 WEIGHT_DECAY = 0.05
 VAL_RATIO = 0.1
-NUM_WORKERS = 0
+NUM_WORKERS = 2
 
 # 数据：Hugging Face 数据集
 HF_REPO = "xiaochuan-dev/captcha-new"

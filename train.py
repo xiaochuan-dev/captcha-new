@@ -35,7 +35,7 @@ from config import (
     MODEL_DROPOUT,
 )
 from model import CaptchaCNNTransformer
-from dataset import CaptchaDataset, ctc_collate_fn
+from dataset import get_datasets, ctc_collate_fn
 
 
 def decode_prediction(
@@ -119,24 +119,7 @@ def train():
     ])
 
 
-    train_dataset = CaptchaDataset(transform=train_transform)
-    val_dataset   = CaptchaDataset()
-
-    dataset_size = len(train_dataset)
-    val_size     = max(1, int(VAL_RATIO * dataset_size))
-    train_size   = dataset_size - val_size
-
-    # 固定随机种子
-    rng = np.random.RandomState(42)
-    indices = rng.permutation(dataset_size)
-
-    train_indices = indices[:train_size]
-    val_indices   = indices[train_size:]
-
-    train_set = Subset(train_dataset, train_indices)
-    val_set   = Subset(val_dataset,   val_indices)
-
-    print(f"Train: {train_size:,} | Val: {val_size:,}", flush=True)
+    train_set, val_set = get_datasets(train_transform=train_transform)
 
     # ============================================================
     # DataLoader
