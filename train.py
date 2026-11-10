@@ -114,7 +114,7 @@ def train():
             degrees=2,
             scale=(0.9, 1.1),
             translate=(0.01, 0.01),
-            fill=1
+            fill=1.0
         ),
     ])
 
