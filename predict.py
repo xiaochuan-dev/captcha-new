@@ -7,7 +7,7 @@ from PIL import Image
 from config import *
 from model import CaptchaCNNTransformer
 from train import decode_prediction
-from utils import resize_crop_border
+from utils import resize_keep_ratio_pad
 
 
 def predict(filepaths, model_path):
@@ -50,7 +50,7 @@ def predict(filepaths, model_path):
         img = Image.open(filepath).convert('RGB')
 
         # 2. 必须和数据生成走同一个 resize（内部强制变灰度）
-        img = resize_crop_border(img, IMG_H, IMG_W)   # 输出 mode="L", size=(128, 32)
+        img = resize_keep_ratio_pad(img, IMG_H, IMG_W)   # 输出 mode="L", size=(128, 32)
 
         # 3. 和 Dataset 完全一致的处理
         img_array = np.array(img, dtype=np.uint8)                # (32, 128)
