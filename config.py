@@ -1,5 +1,5 @@
 # 词表：仅数字 + 小写字母（大写在数据侧映射为小写）
-CHARSET = "2345678abcdefgmnpwxy"
+CHARSET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
 NUM_CLASSES = len(CHARSET) + 1  # +1 for CTC blank
 
 CHAR2IDX = {c: i + 1 for i, c in enumerate(CHARSET)}
@@ -13,7 +13,7 @@ CHANNELS = 1
 
 # 训练
 BATCH_SIZE = 128
-EPOCHS = 10
+EPOCHS = 20
 LR = 3e-4
 WEIGHT_DECAY = 0.05
 VAL_RATIO = 0.1
@@ -22,7 +22,7 @@ NUM_WORKERS = 2
 # 数据：Hugging Face 数据集
 HF_REPO = "xiaochuan-dev/captcha-new"
 HF_FILENAME = "captcha_dataset_red.parquet"
-LOCAL_PARQUET = "./data/captcha_dataset_red.parquet"
+LOCAL_PARQUET = "./data/captcha_dataset_s.parquet"
 
 # 模型结构参数（与原 model 一致）
 MODEL_DIM = 256

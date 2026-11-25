@@ -109,40 +109,12 @@ def train():
     #
 
     train_transform = transforms.Compose([
-        transforms.RandomResizedCrop(
-            size=(IMG_H, IMG_W),
-            scale=(0.65, 1.0),              # 比原来更强
-            ratio=(0.8, 1.25)
-        ),
         transforms.RandomAffine(
             degrees=35,                     # 加大旋转
             scale=(0.75, 1.3),              # 加大缩放范围
             translate=(0.22, 0.22),         # 加大平移
             shear=15,
             fill=1.0
-        ),
-        transforms.RandomPerspective(
-            distortion_scale=0.35,          # 较强透视
-            p=0.5,
-            fill=1.0
-        ),
-        transforms.ElasticTransform(
-            alpha=55.0,                     # 明显加强弹性形变
-            sigma=4.0
-        ),
-        transforms.ColorJitter(
-            brightness=0.4,
-            contrast=0.4,
-            saturation=0.35,
-            hue=0.1
-        ),
-        transforms.RandomAutocontrast(p=0.4),
-        transforms.GaussianBlur(kernel_size=5, sigma=(0.1, 2.5)),  # 模糊更强
-        transforms.RandomErasing(
-            p=0.45,
-            scale=(0.02, 0.18),             # 加大擦除面积
-            ratio=(0.3, 3.3),
-            value=1.0
         ),
     ])
 
@@ -162,8 +134,8 @@ def train():
         generator=torch.Generator().manual_seed(42),
     )
 
-    # train_dataset = CaptchaDataset(transform=train_transform)
-    train_dataset = CaptchaDataset()
+    train_dataset = CaptchaDataset(transform=train_transform)
+    # train_dataset = CaptchaDataset()
 
     val_dataset = CaptchaDataset()
 
