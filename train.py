@@ -110,10 +110,10 @@ def train():
 
     train_transform = transforms.Compose([
         transforms.RandomAffine(
-            degrees=5,                     # 加大旋转
-            scale=(0.95, 1.05),              # 加大缩放范围
+            degrees=10,                     # 加大旋转
+            scale=(0.9, 1.1),              # 加大缩放范围
             translate=(0.05, 0.05),         # 加大平移
-            shear=5,
+            shear=10,
             fill=1.0
         ),
     ])
@@ -134,8 +134,8 @@ def train():
         generator=torch.Generator().manual_seed(42),
     )
 
-    # train_dataset = CaptchaDataset(transform=train_transform)
-    train_dataset = CaptchaDataset()
+    train_dataset = CaptchaDataset(transform=train_transform)
+    # train_dataset = CaptchaDataset()
 
     val_dataset = CaptchaDataset()
 
