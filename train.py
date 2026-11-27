@@ -110,10 +110,10 @@ def train():
 
     train_transform = transforms.Compose([
         transforms.RandomAffine(
-            degrees=15,                     # 加大旋转
-            scale=(0.9, 1.1),              # 加大缩放范围
+            degrees=5,                     # 加大旋转
+            scale=(0.95, 1.05),              # 加大缩放范围
             translate=(0.05, 0.05),         # 加大平移
-            shear=15,
+            shear=5,
             fill=1.0
         ),
     ])
