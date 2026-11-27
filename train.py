@@ -112,7 +112,7 @@ def train():
         transforms.RandomAffine(
             degrees=5,                     # 加大旋转
             scale=(0.9, 1.1),              # 加大缩放范围
-            translate=(0.1, 0.9),         # 加大平移
+            translate=(0.2, 0.1),         # 加大平移
             # shear=15,
             fill=1.0
         ),
